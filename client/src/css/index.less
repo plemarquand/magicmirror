@@ -1,0 +1,63 @@
+@import 'weathericons.less';
+@import url(http://fonts.googleapis.com/css?family=Arimo);
+
+body {
+	font-family: 'Arimo', sans-serif;
+	color: white;
+	background-color: black;
+}
+
+.top-right-content {
+	min-width: 20em;
+	display: flex;
+	flex-direction: column;
+	right: 20px;
+	top: 20px;
+	position: absolute;
+}
+
+.current-time {
+	text-align: center;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+.weather {
+	display: flex;
+	flex-direction: column;
+
+	.current {
+		font-size: 4em;
+    	padding: 0 10px;
+		align-items: baseline;
+	}
+
+	.current-sub {
+		font-size: 2em;
+		padding: 10px 20px;
+		align-items: baseline;
+	}
+
+	.forecast {
+		align-items: baseline;
+		padding: 3px 10px;
+
+		.time {
+			width: 50px;
+		}
+
+		.temp {
+			width: 30px;
+		}
+	}
+
+	.row {
+		display: flex;
+		justify-content: space-around;
+		flex-direction: row;
+	}
+
+	sup {
+		font-size: .4em;
+	}
+}
