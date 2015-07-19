@@ -5,56 +5,65 @@ import moment from 'moment';
 import Cycle from '@cycle/core';
 import { makeDOMDriver, h } from '@cycle/web';
 import { weatherIcon, beafortIcon, windDirectionIcon } from './utils';
-import { request, interval } from '../util/rx';
+import { request, interval, animator, defaultProp } from '../util/rx';
+import { visibleState } from '../util/view';
 
 const SCAN_INTERVAL = (60 * 5) * 1000;
 
-const renderCurrentConditions = (weather) => (
-  <div className='current row'>
+const renderCurrentConditions = (weather, visible) => (
+  <div className={'current row ' + visibleState(visible)}>
     <div>{Math.round(weather.main.temp).toString()}°</div>
     <div className={'wi ' + weatherIcon(weather)}></div>
   </div>
 );
 
-const renderWindConditions = (weather) => (
-  <div className='current-sub row'>
+const renderWindConditions = (weather, visible) => (
+  <div className={'current-sub row ' + visibleState(visible)}>
     <div>
-      <span>{Math.round(weather.wind.speed).toString()}</span><sup>km/h</sup>
+      <span>{Math.round(weather.wind.speed).toString()}</span><sup> km/h</sup>
     </div>
     <div className={'wi ' + beafortIcon(weather)}></div>
     <div className={'wi ' + windDirectionIcon(weather)}></div>
   </div>
 );
 
-const renderForecast = (forecast) => forecast.map((item) => (
-  <div className='forecast row'>
+const renderForecast = (forecast, tick) => forecast.map((item, i) => (
+  <div className={'forecast row ' + visibleState(tick > i)}>
     <div className='time'>{moment(item.dt * 1000).format('ha')}</div>
     <div className={'wi ' + weatherIcon(item)}></div>
     <div className='temp'>{Math.round(item.main.temp).toString()}°</div>
   </div>
 ));
 
-const view = ($state) => $state.map(({weather, forecast}) => (
+const view = ($state) => $state
+  .flatMap(({weather, forecast, active}) => animator(forecast.length + 2, animator.DEFAULT_DURATION, !active).map((tick) => ({weather, forecast, tick})))
+  .map(({weather, forecast, tick}) => (
   <div className='weather'>
-    {renderCurrentConditions(weather)}
-    {renderWindConditions(weather)}
-    {renderForecast(forecast)}
+    {renderCurrentConditions(weather, tick > 0)}
+    {renderWindConditions(weather, tick > 1)}
+    {renderForecast(forecast, tick - 2)}
   </div>
 ));
 
 const currentWeather = (city$) => city$
   .flatMap((city) => request({url: `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric`}))
 
-const forecast = (city$) => city$
+const forecast = (city$, forecastSize$) => city$
   .flatMap((city) => request({url: `http://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric`}))
-  .map(weather => weather.list.slice(0, Math.min(weather.cnt, 6)))
+  .combineLatest(forecastSize$, (weather, forecastSize) => weather.list.slice(0, Math.min(weather.cnt, forecastSize)))
 
-const model = (city$) => Cycle.Rx.Observable.combineLatest(currentWeather(city$), forecast(city$), (weather, forecast) => ({weather, forecast}));
+const model = (props$) => props$
+  .flatMap(props => Cycle.Rx.Observable.zip(currentWeather(props.city), forecast(props.city, props.forecastSize), props.active, (weather, forecast, active) => ({weather, forecast, active}))
+  .distinctUntilChanged())
 
-const intent = (city$) => interval(SCAN_INTERVAL).flatMap(() => city$)
+const intent = (props) => props.active.distinctUntilChanged().map(() => props);
 
 export default (responses) => {
-  const city = responses.props.get('city').startWith('new york').debounce(50).first();
+  const props = {
+    city: defaultProp(responses.props, 'city', 'toronto'),
+    forecastSize: defaultProp(responses.props, 'forecastSize', 10),
+    active: responses.props.get('active')
+  };
 
-  return {DOM: view(model(intent(city)))}
+  return {DOM: view(model(intent(props)))};
 }

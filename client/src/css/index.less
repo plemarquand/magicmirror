@@ -1,5 +1,6 @@
 @import 'weathericons.less';
 @import url(http://fonts.googleapis.com/css?family=Arimo);
+@import url(http://fonts.googleapis.com/css?family=Fredoka+One);
 
 body {
 	font-family: 'Arimo', sans-serif;
@@ -14,17 +15,60 @@ body {
 	right: 20px;
 	top: 20px;
 	position: absolute;
+
+	.row {
+		justify-content: space-around;
+	}
+}
+
+.top-left-content {
+	min-width: 20em;
+	display: flex;
+	flex-direction: column;
+	left: 20px;
+	top: 20px;
+	position: absolute;
+	text-align: left;
+}
+
+.media {
+	font-size: 1em;
+	align-items: baseline;
+
+	.num-shows {
+		font-size: 2em;
+		padding-right: 3px;
+		font-family: 'Fredoka One', cursive;
+	}
 }
 
 .current-time {
 	text-align: center;
     font-size: 1.8em;
     margin-bottom: 10px;
+		font-family: 'Fredoka One', cursive;
+}
+
+.row {
+	display: flex;
+	flex-direction: row;
+	opacity: 0;
+
+	&.visible {
+		opacity: 1;
+		transition: opacity 1.25s ease-out;
+	}
+
+	&.invisible {
+		opacity: 0;
+		transition: opacity .75s ease-out;
+	}
 }
 
 .weather {
 	display: flex;
 	flex-direction: column;
+		font-family: 'Fredoka One', cursive;
 
 	.current {
 		font-size: 4em;
@@ -51,11 +95,6 @@ body {
 		}
 	}
 
-	.row {
-		display: flex;
-		justify-content: space-around;
-		flex-direction: row;
-	}
 
 	sup {
 		font-size: .4em;

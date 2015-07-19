@@ -28,7 +28,10 @@
   "dependencies": {
     "@cycle/core": "^1.0.0",
     "@cycle/web": "^2.1.1",
+    "cycle-socket.io": "^1.0.0",
+    "cyclejs": "^0.24.1",
     "jquery": "^2.1.4",
-    "moment": "^2.10.3"
+    "moment": "^2.10.3",
+    "socket.io-client": "^1.3.5"
   }
 }
