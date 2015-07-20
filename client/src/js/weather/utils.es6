@@ -35,7 +35,7 @@ export const kmh2beafort = (weather) => {
   return 12;
 }
 export const windDirectionIcon = (weather) => {
-	const deg = weather.wind.deg - (weather.wind.deg % 15);
-	return `wi-wind-default _${deg}-deg`;
+  const deg = weather.wind.deg - (weather.wind.deg % 15);
+  return `wi-wind-default _${deg}-deg`;
 }
 export const beafortIcon = (weather) => 'wi-beafort-' + kmh2beafort(weather);

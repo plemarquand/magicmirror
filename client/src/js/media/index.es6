@@ -10,21 +10,21 @@ import { visibleState } from '../util/view';
 const INTERVAL = (60 * 60) * 1000;
 const showsView = (shows, titles, tick) => titles.map((title, i) => (
   <div className={'row media ' + visibleState(tick > i)}>
-  	<div className='num-shows'>{shows[title].length.toString()}</div>
-  	<div className='title'>{title}</div>
+    <div className='num-shows'>{shows[title].length.toString()}</div>
+    <div className='title'>{title}</div>
   </div>
 ));
 
 const view = (state$) => state$
   .flatMap(({shows, active, date, titles}) => animator(titles.length + 2, animator.DEFAULT_DURATION, !active)
-  	.map((tick) => ({date, shows, titles, tick})))
+    .map((tick) => ({date, shows, titles, tick})))
   .map((state) => (
-  	<div>
-  		{showsView(state.shows, state.titles, state.tick)}
+    <div>
+      {showsView(state.shows, state.titles, state.tick)}
       <div className={'row search-duration ' + visibleState(state.tick >= state.titles.length + 1)}>
         {'Last ' + moment().diff(moment(new Date(state.date)), 'days') + ' days'}
       </div>
-  	</div>
+    </div>
   ));
 
 const model = (active$) => Cycle.Rx.Observable.combineLatest(
