@@ -1,30 +1,29 @@
-/** @jsx dom */
-const dom = (tag, attrs, ...children) => h(tag, attrs, children);
-
+/** @jsx hJSX */
 import moment from 'moment';
-import Cycle from '@cycle/core';
-import { makeDOMDriver, h } from '@cycle/web';
+import { Rx } from '@cycle/core';
+import { makeDOMDriver, hJSX } from '@cycle/dom';
 import { interval, animator } from '../util/rx';
-import { visibleState } from '../util/view';
+import { visibleState, rowCl } from '../util/view';
 
 const INTERVAL = 1000;
-const currentTime = () =>  moment().format('MMM Do, h:mma');
+
+const currentTime = () => moment().format('MMM Do, h:mma');
 
 const view = ($state) => $state
   .map(state => (
-  	<div className={'row ' + visibleState(state.active)}>{state.time}</div>
+  	<div className={rowCl(visibleState(state.active))}>{state.time}</div>
   ));
 
 const model = (active$) => active$
   .map((active) => ({active, time: currentTime()}))
   .distinctUntilChanged();
 
-const intent = (active$) => Cycle.Rx.Observable.merge(interval(INTERVAL), active$)
+const intent = (active$) => Rx.Observable.merge(interval(INTERVAL), active$)
   .flatMap(() => active$.take(1));
 
 export default (responses) => {
   const active = responses.props.get('active')
-  	.delayWithSelector((active) => Cycle.Rx.Observable.timer(active ? 0 : 900));
+  	.delayWithSelector((active) => Rx.Observable.timer(active ? 0 : animator.defaultDuration * 13));
 
   return {DOM: view(model(intent(active)))};
 }

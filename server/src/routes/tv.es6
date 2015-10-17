@@ -12,13 +12,12 @@ export default (url, apikey) => {
     debug: true
   });
 
-  const test = false;
   const cutoffDays = 5;
   const lookbackCutoff = moment().subtract(moment.duration(cutoffDays, 'd'));
   const dateFilename = require('path').join(__dirname, 'lastSavedDate.dat');
 
   // Loads the Sickbeard history (last 100 items)
-  const loadHistory = (sb) => Rx.Observable.fromPromise(sb.cmd('history', {}))
+  const loadHistory = (sb) => Rx.Observable.fromPromise(sb.cmd('history', {}));
 
   // Returns the last date/time a TV report was run, minimum date `lookbackCutoff`.
   const loadLastSearchDate = (filename) => Rx.Observable.catch(
@@ -45,7 +44,7 @@ export default (url, apikey) => {
 
   // Saves the current date and time to the last run text file.
   // Subsequent searches will only return shows downloaded after this date.
-  var saveSearchDate = () => fs.writeFileSync(dateFilename, moment().toString());
+  var saveSearchDate = (filename) => fs.writeFileSync(filename, moment().toString());
 
   var router = express.Router();
   router.get('/tv', (req, res) => Rx.Observable.combineLatest(
@@ -63,11 +62,8 @@ export default (url, apikey) => {
         date, shows
       })
     ))
-    .doAction(saveSearchDate)
-    .subscribe(data => res.status(200).send(data), (e) => {
-      console.log("E???", e.stack);
-      res.status(500).send(e)
-    }));
+    .doAction(() => saveSearchDate(dateFilename))
+    .subscribe(data => res.status(200).send(data), (e) => res.status(500).send(e)));
 
   return router;
 }

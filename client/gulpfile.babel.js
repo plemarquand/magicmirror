@@ -12,10 +12,13 @@ var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync').create();
 var runSequence = require('run-sequence');
 
+var debug = require('gulp-debug');
+
 var lessSrc = './src/css/**/*.less';
 var jsSrc = './src/js/**/*.es6';
 var assetSrc = './src/**/*.!(es6|less)';
 var outputDir = './dist/';
+var serverDir = '../server/www/';
 
 gulp.task('clean', () => gulp.src('dist', {read: false})
   .pipe(rimraf()));
@@ -45,16 +48,25 @@ gulp.task('copy_assets', () => gulp.src(assetSrc)
   .pipe(gulp.dest(outputDir)))
   .on('error', gutil.log);
 
-gulp.task('js-watch', ['js'], () => browserSync.reload());
-gulp.task('less-watch', ['less'], () => browserSync.reload());
-gulp.task('asset-watch', ['copy_assets'], () => browserSync.reload());
+console.log("PATH?", path.join(outputDir, '**/*'));
+gulp.task('copy_to_server', () => gulp.src(path.join(outputDir, '**/*'))
+  .pipe(debug({title: 'unicorn:'}))
+  .pipe(gulp.dest(serverDir)))
+  .on('error', gutil.log);
+
+gulp.task('js-watch', ['js', 'copy_to_server'], () => browserSync.reload());
+gulp.task('less-watch', ['less', 'copy_to_server'], () => browserSync.reload());
+gulp.task('asset-watch', ['copy_assets', 'copy_to_server'], () => browserSync.reload());
 
 gulp.task('serve', () => {
-  browserSync.init({server: {baseDir: outputDir}});
+  browserSync.init({
+    proxy: 'http://localhost:8080',
+    port: 3000
+  });
 
   gulp.watch(jsSrc, ['js-watch']);
   gulp.watch(lessSrc, ['less-watch']);
   gulp.watch(assetSrc, ['asset-watch']);
 });
 
-gulp.task('default', (callback) => runSequence('clean', ['js', 'less', 'copy_assets'], 'serve', callback));
+gulp.task('default', (callback) => runSequence('clean', ['js', 'less', 'copy_assets'], 'copy_to_server', 'serve', callback));

@@ -1,9 +1,11 @@
 @import 'weathericons.less';
-@import url(http://fonts.googleapis.com/css?family=Arimo);
-@import url(http://fonts.googleapis.com/css?family=Fredoka+One);
+@import url(http://fonts.googleapis.com/css?family=Slabo+27px);
+@import url(http://fonts.googleapis.com/css?family=Quicksand:300,400);
 
-body {
-	font-family: 'Arimo', sans-serif;
+@textFont: "Quicksand";
+
+body, html {
+	font-family: @textFont, cursive;
 	color: white;
 	background-color: black;
 }
@@ -38,7 +40,6 @@ body {
 	.num-shows {
 		font-size: 2em;
 		padding-right: 3px;
-		font-family: 'Fredoka One', cursive;
 	}
 }
 
@@ -46,7 +47,6 @@ body {
 	text-align: center;
     font-size: 1.8em;
     margin-bottom: 10px;
-		font-family: 'Fredoka One', cursive;
 }
 
 .row {
@@ -56,19 +56,20 @@ body {
 
 	&.visible {
 		opacity: 1;
-		transition: opacity 1.25s ease-out;
+		transform: translateY(0px) scale(1,1);
+		transition: all .75s ease-out;
 	}
 
 	&.invisible {
 		opacity: 0;
-		transition: opacity .75s ease-out;
+		transform: translateY(10px) scale(0.8, 0.8);
+		transition: all .75s ease-out;
 	}
 }
 
 .weather {
 	display: flex;
 	flex-direction: column;
-		font-family: 'Fredoka One', cursive;
 
 	.current {
 		font-size: 4em;
@@ -87,7 +88,7 @@ body {
 		padding: 3px 10px;
 
 		.time {
-			width: 50px;
+			width: 3em;
 		}
 
 		.temp {
@@ -98,5 +99,11 @@ body {
 
 	sup {
 		font-size: .4em;
+	}
+}
+
+.todo {
+	.content {
+		margin-left: 5px;
 	}
 }

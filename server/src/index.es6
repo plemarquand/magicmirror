@@ -23,6 +23,8 @@ module.exports = {
     app.use(express.static(path.join(__dirname, '../www/')));
     app.use(allowCrossDomain);
     app.use(require('./routes/tv')(process.env.SICKBEARD_URL, process.env.SICKBEARD_KEY));
+    app.use(require('./routes/todo')(process.env.TODOIST_EMAIL, process.env.TODOIST_PASSWORD));
+    app.use(require('./routes/weather')(process.env.OPENWEATHER_API_KEY));
 
     servers.http = http.createServer(app);
     servers.socket = socketio(servers.http);

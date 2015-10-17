@@ -4,3 +4,5 @@ dist
 .env
 bower_components
 .DS_Store
+
+server/www

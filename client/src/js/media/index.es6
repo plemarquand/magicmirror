@@ -1,39 +1,40 @@
-/** @jsx dom */
-const dom = (tag, attrs, ...children) => h(tag, attrs, children);
-
+/** @jsx hJSX */
 import moment from 'moment';
-import Cycle from '@cycle/core';
-import { makeDOMDriver, h } from '@cycle/web';
+import { Rx } from '@cycle/core';
+import { makeDOMDriver, hJSX } from '@cycle/dom';
 import { interval, animator, request } from '../util/rx';
-import { visibleState } from '../util/view';
+import { visibleState, rowCl } from '../util/view';
 
 const INTERVAL = (60 * 60) * 1000;
+
 const showsView = (shows, titles, tick) => titles.map((title, i) => (
-  <div className={'row media ' + visibleState(tick > i)}>
+  <div className={rowCl(visibleState(tick > i), 'media')}>
     <div className='num-shows'>{shows[title].length.toString()}</div>
     <div className='title'>{title}</div>
   </div>
 ));
 
 const view = (state$) => state$
-  .flatMap(({shows, active, date, titles}) => animator(titles.length + 2, animator.DEFAULT_DURATION, !active)
-    .map((tick) => ({date, shows, titles, tick})))
+  .flatMap(({shows, active, date, titles, downloads}) => animator(titles.length + 2, !active)
+    .map((tick) => ({date, shows, titles, tick, downloads})))
   .map((state) => (
     <div>
-      {showsView(state.shows, state.titles, state.tick)}
-      <div className={'row search-duration ' + visibleState(state.tick >= state.titles.length + 1)}>
-        {'Last ' + moment().diff(moment(new Date(state.date)), 'days') + ' days'}
+      <div className={rowCl(visibleState(state.tick >= 1), 'search-duration')}>
+        {state.downloads.toString() + ' downloads in the last ' + moment().diff(moment(new Date(state.date)), 'days') + ' days'}
       </div>
+      {showsView(state.shows, state.titles, state.tick - 1)}
     </div>
   ));
 
-const model = (active$) => Cycle.Rx.Observable.combineLatest(
+const calculateDownloads = (shows) => Object.keys(shows).reduce((memo, i) => memo + shows[i].length, 0);
+
+const model = (active$) => Rx.Observable.combineLatest(
   active$,
-  request({url: `http://localhost:8080/tv`}),
-  (active, {shows, date}) => ({active, date, shows, titles: Object.keys(shows)}))
+  request({url: `/tv`}),
+  (active, {shows, date}) => ({active, date, shows, titles: Object.keys(shows), downloads: calculateDownloads(shows)}))
   .distinctUntilChanged()
 
-const intent = (active$) => Cycle.Rx.Observable.merge(interval(INTERVAL), active$)
+const intent = (active$) => Rx.Observable.merge(interval(INTERVAL), active$)
   .flatMap(() => active$.take(1));
 
 export default (responses) => {
