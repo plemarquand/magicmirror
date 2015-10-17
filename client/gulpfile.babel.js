@@ -12,8 +12,6 @@ var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync').create();
 var runSequence = require('run-sequence');
 
-var debug = require('gulp-debug');
-
 var lessSrc = './src/css/**/*.less';
 var jsSrc = './src/js/**/*.es6';
 var assetSrc = './src/**/*.!(es6|less)';
@@ -48,9 +46,7 @@ gulp.task('copy_assets', () => gulp.src(assetSrc)
   .pipe(gulp.dest(outputDir)))
   .on('error', gutil.log);
 
-console.log("PATH?", path.join(outputDir, '**/*'));
 gulp.task('copy_to_server', () => gulp.src(path.join(outputDir, '**/*'))
-  .pipe(debug({title: 'unicorn:'}))
   .pipe(gulp.dest(serverDir)))
   .on('error', gutil.log);
 
